@@ -11,3 +11,9 @@ Merge configuration from `envoy-override.yaml` into `envoy-basic.yaml`:
 envoy -c config/envoy-basic.yaml --config-yaml "$(cat config/envoy-override.yaml)"
 curl -v localhost:9902
 ```
+
+Validate a configuration file without starting (or restarting) Envoy:
+```
+envoy --mode validate -c config/envoy-basic.yaml
+```
+

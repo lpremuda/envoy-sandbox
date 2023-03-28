@@ -11,26 +11,28 @@ static_resources:
       - name: envoy.filters.network.http_connection_manager
         typed_config:
           "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
-          stat_prefix: ingress_http
-          access_log:
-          - name: envoy.access_loggers.stdout
+        # codec_type: AUTO (default)                          # automcailly chooses between HTTP/1.1 and HTTP/2
+          stat_prefix: ingress_http                           # prefix used when emitting statstics for HTTP connection manager
+          access_log:                                         # config for connection manager's emitted HTTP access logs
+          - name: envoy.access_loggers.stdout                 # name of access log extension configuration
             typed_config:
               "@type": type.googleapis.com/envoy.extensions.access_loggers.stream.v3.StdoutAccessLog
+          # filter: (used to determind if the access log should be written)
           http_filters:
           - name: envoy.filters.http.router
             typed_config:
               "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
-          route_config:
-            name: local_route
-            virtual_hosts:
-            - name: local_service
-              domains: ["*"]
+          route_config:                                       # static config for connection manager's route table
+            name: local_route                                 # name of route config
+            virtual_hosts:                                    # array of virtual hosts (VH is top level element in routing config)
+            - name: local_service                             # logical name of virtual host (used for things like stats)
+              domains: ["*"]                                  # list of domains that will be matched to this virtual host
               routes:
               - match:
                   prefix: "/"
                 route:
-                  host_rewrite_literal: www.envoyproxy.io
-                  cluster: service_envoyproxy_io
+                  host_rewrite_literal: www.envoyproxy.io     # during forwarding, host header will be swapped with this value
+                  cluster: service_envoyproxy_io              # upstream cluster which the request should be routed to
 
   clusters:
   - name: service_envoyproxy_io
